@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 //import java.util.HashMap;
@@ -17,6 +18,7 @@ import java.util.stream.Stream;
 public class ReadTxt {
 
 	public static void main(String[] args) {
+
 		String line;
 		BufferedReader br = null;
 		BufferedWriter bw = null, bw2 = null;
@@ -36,42 +38,59 @@ public class ReadTxt {
 			br = new BufferedReader(new FileReader("./src/pg2600.txt"));
 			bw = new BufferedWriter(fw);
 			bw2 = new BufferedWriter(fw2);
+
 			while ((line = br.readLine()) != null) { //
 				line = line.toLowerCase(Locale.US);
 				String[] array = line.split("[^A-z]"); // split("^A-z")
 				for (int n = 0; n < array.length; n++) { // String word: words
+					
 					String word = array[n];
+					//System.out.println(word);
 					if (word.isEmpty()) {
 						continue;
 					}
 					MyStruct word_frequency = new ReadTxt().new MyStruct(word,0); // initiate object for this word
-					ListIterator listIterator = list.listIterator();
-					while (listIterator.hasNext()){
+					ListIterator<MyStruct> listIterator = list.listIterator();
+					boolean addNew = true;
 
-				         MyStruct element = (MyStruct)listIterator.next();
-				         if(word == element.word){
-				        	 word_frequency.setCount(element.count);
-				        	 list.add(word_frequency);
-				         }else{
-				        	 word_frequency.setCount(1);
-				         }
-					}/*
-					if (list.contains(word_frequency)) {
-						word_frequency.setCount(word_frequency.count);
+					for (MyStruct element: list) {
 
-					} else {
-						word_frequency.setCount(word_frequency.count);
+						if (word.equals(element.word) ) {
+							element.setCount(element.count + 1);
+							addNew = false;
+						} 
 					}
-					list.add(word_frequency); */
+					if (addNew) {
+						//System.out.println("Adding");
+						word_frequency.setCount(1);
+						list.add(word_frequency);
+					}
+
+					/*
+					 * if (list.contains(word_frequency)) {
+					 * word_frequency.setCount(word_frequency.count);
+					 * 
+					 * } else { word_frequency.setCount(word_frequency.count); }
+					 * list.add(word_frequency);
+					 */
 				}
 			}// while
 
 			bw.write("word, frequency\n");
-
 			for (MyStruct object : list) { // key corresponds to each word
 				bw.write(object.word + ", " + object.count + "\n");
+				//System.out.println(object.word);
 			}
-			System.out.println("hey");
+			
+			Collections.sort(list);
+			System.out.println(" Writting to file top 10!");
+			int loopcount = 0;
+			
+			for (MyStruct object : list) { // key corresponds to each word
+				bw2.write( object.word + ", " + object.count + "\n");
+				System.out.println(object.word);
+				if(loopcount++ > 10) break;
+			}
 			/*
 			 * Map<String, Integer> lhm = sortByValue(hm);
 			 * bw2.write("word, frequency\n"); int loopcount = 0; for (String
@@ -111,7 +130,7 @@ public class ReadTxt {
 		return result;
 	}
 
-	public class MyStruct {
+	public class MyStruct implements Comparable<MyStruct>{
 		String word;
 		int count;
 
@@ -134,11 +153,10 @@ public class ReadTxt {
 
 			return isEqual;
 		}
-
+		
 		@Override
-		public int hashCode() {
-			//return Object.hashCode(word);
-			return 0;
+		public int compareTo(MyStruct w) {
+		    return w.count - count; 
 		}
 
 	}// MyStruct
